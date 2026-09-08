@@ -1,0 +1,39 @@
+name: Build Windows exe
+
+# Runs automatically whenever you push to the main branch,
+# and can also be triggered manually from the Actions tab.
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Enable Windows desktop support
+        run: flutter config --enable-windows-desktop
+
+      - name: Add Windows platform files
+        run: flutter create --platforms=windows .
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build release exe
+        run: flutter build windows
+
+      - name: Upload build as a downloadable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pricecheck-windows-build
+          path: build/windows/x64/runner/Release/
